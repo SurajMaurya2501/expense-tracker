@@ -1,0 +1,76 @@
+{
+  "project_info": {
+    "project_number": "1041539484545",
+    "project_id": "ai-bot-701fc",
+    "storage_bucket": "ai-bot-701fc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1041539484545:android:9c4f0deed1a04a6db57680",
+        "android_client_info": {
+          "package_name": "com.example.ai_bot"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1041539484545-r369tjgoo3q4ijt1h5ce0i1a0td0gpjs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ai_bot",
+            "certificate_hash": "7f600bbeb011fb72fde543961d2f9b45b5c2ff41"
+          }
+        },
+        {
+          "client_id": "1041539484545-s60jq449c1ve3aterni2qbp8nlppm9lg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCd0HtWK8qGloF6FW3faFihH05tOZtmbjw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1041539484545-s60jq449c1ve3aterni2qbp8nlppm9lg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1041539484545:android:0a9e14269644c3f5b57680",
+        "android_client_info": {
+          "package_name": "com.example.expense_tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1041539484545-s60jq449c1ve3aterni2qbp8nlppm9lg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCd0HtWK8qGloF6FW3faFihH05tOZtmbjw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1041539484545-s60jq449c1ve3aterni2qbp8nlppm9lg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
