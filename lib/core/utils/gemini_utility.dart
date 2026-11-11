@@ -2,16 +2,17 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:expense_tracker/models/expense_tracker_model.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 
 class GeminiUtility {
-  Future<Map<String, dynamic>> processBillWithFirebaseAi({
+  Future<ExpenseTrackerModel> processBillWithFirebaseAi({
     required File image,
   }) async {
     try {
       final firebaseAi = FirebaseAI.googleAI();
       final model = firebaseAi.generativeModel(
-        model: 'gemini-1.5-flash',
+        model: 'gemini-3.5-flash',
         generationConfig: GenerationConfig(
           responseMimeType: 'application/json',
           responseSchema: Schema.object(
@@ -45,7 +46,7 @@ class GeminiUtility {
       final imageBytes = await image.readAsBytes();
       final prompt = [
         Content.multi([
-          InlineDataPart('image/jpeg', imageBytes),
+          InlineDataPart('image/jpg', imageBytes),
           TextPart(
             'Verify if this is a bill, extract the merchant and total amount, and choose a strict category.',
           ),
@@ -61,10 +62,11 @@ class GeminiUtility {
       }
 
       // 4. Safely decode the guaranteed JSON structure
-      return jsonDecode(jsonString) as Map<String, dynamic>;
+      final jsonResponse = jsonDecode(jsonString) as Map<String, dynamic>;
+      return ExpenseTrackerModel.fromJson(jsonResponse);
     } catch (error) {
       log('Something went wrong while processing image with AI - $error');
-      return {};
+      return ExpenseTrackerModel.empty();
     }
   }
 }

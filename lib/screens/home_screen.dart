@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:expense_tracker/core/utils/gemini_utility.dart';
@@ -26,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> testBillParsing() async {
     try {
       final byteData = await rootBundle.load(
-        'assets/printable_invoice_template.png',
+        'assets/Detailed-Grocery-Payment-Receipt-Samples.jpg',
       );
       final tempDir = Directory.systemTemp;
       final file = File('${tempDir.path}/test_bill.jpg');
@@ -38,11 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       // Print the structured result to debug console
-      debugPrint('--- SUCCESSFUL PARSING ---');
-      debugPrint('Is Bill: ${result['is_bill']}');
-      debugPrint('Category: ${result['category']}');
-      debugPrint('Merchant: ${result['merchant_name']}');
-      debugPrint('Total Amount: ${result['total_amount']}');
+      log(
+        '${result.category}--${result.isBill}--${result.merchantName}--${result.totalAmount}',
+      );
     } catch (e) {
       debugPrint('--- PARSING FAILED ---');
       debugPrint(e.toString());
