@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:expense_tracker/models/expense_tracker_model.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 
@@ -61,7 +60,6 @@ class GeminiUtility {
         throw Exception('Empty response received from Gemini via Firebase AI.');
       }
 
-      // 4. Safely decode the guaranteed JSON structure
       final jsonResponse = jsonDecode(jsonString) as Map<String, dynamic>;
       return ExpenseTrackerModel.fromJson(jsonResponse);
     } catch (error) {
@@ -69,4 +67,6 @@ class GeminiUtility {
       return ExpenseTrackerModel.empty();
     }
   }
+
+
 }
