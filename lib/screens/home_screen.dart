@@ -5,6 +5,7 @@ import 'package:expense_tracker/core/utils/gemini_utility.dart';
 import 'package:expense_tracker/core/utils/image_picker_utility.dart';
 import 'package:expense_tracker/local/database/app_database.dart';
 import 'package:expense_tracker/local/repositories/expense_repository.dart';
+import 'package:expense_tracker/screens/widgets/pie_chart_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -17,56 +18,62 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _expenseRepo = ExpenseRepository();
-  late Stream<List<ExpenseEntity>> _expenses;
-
+  // late Stream<List<ExpenseEntity>> _expenses;
+  late Stream<List<CategorySummary>> _categorySummary;
   @override
   void initState() {
     super.initState();
-    _expenses = _expenseRepo.watchExpenseForMonth('11-2026');
+    // _expenses = _expenseRepo.watchExpenseForMonth('11-2026');
+    _categorySummary = _expenseRepo.watchTotalExpenseSummary('11-2026');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            StreamBuilder(
-              stream: _expenses,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Something went wrong'));
-                } else if (!snapshot.hasData) {
-                  return Center(child: Text('No Data Available'));
-                } else {
-                  final data = snapshot.data ?? [];
-                  return Column(
-                    children: List.generate(data.length, (index) {
-                      final expense = data[index];
-                      return Row(
-                        children: [
-                          Text(expense.id.toString()),
-                          Text(expense.merchantName),
-                          Text(expense.category),
-                          Text(expense.amount.toString()),
-                          Text(expense.expenseDate.toString()),
-                        ],
-                      );
-                    }),
-                  );
-                }
-              },
-            ),
-            ElevatedButton.icon(
-              onPressed: () {
-                pickAndUploadBill();
-              },
-              label: Text('Upload'),
-              icon: Icon(Icons.upload),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Column(
+            children: [
+              StreamBuilder(
+                stream: _categorySummary,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text(snapshot.error.toString()));
+                  } else if (!snapshot.hasData) {
+                    return Center(child: Text('No Data Available'));
+                  } else {
+                    final data = snapshot.data ?? [];
+                    return Column(
+                      children: [
+                        PieChartWidget(categories: data),
+
+                        ...List.generate(data.length, (index) {
+                          final expense = data[index];
+                          return Row(
+                            mainAxisAlignment: .spaceBetween,
+                            children: [
+                              Text(expense.category),
+                              Text(expense.totalAmount.toStringAsFixed(2)),
+                            ],
+                          );
+                        }),
+                      ],
+                    );
+                  }
+                },
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  pickAndUploadBill();
+                },
+                label: Text('Upload'),
+                icon: Icon(Icons.upload),
+              ),
+            ],
+          ),
         ),
       ),
     );
