@@ -51,6 +51,10 @@
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Expense Tracker uses the camera to photograph bills.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Expense Tracker uses your photos to import bills from the gallery.</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>

@@ -15,6 +15,10 @@ class ExpenseRepository {
     return await _db.into(_db.expenses).insert(entity);
   }
 
+  Future<int> deleteExpense(int id) {
+    return (_db.delete(_db.expenses)..where((tbl) => tbl.id.equals(id))).go();
+  }
+
   Stream<List<ExpenseEntity>> watchExpenseForMonth(String yearMonth) {
     return (_db.select(_db.expenses)
           ..where((tbl) => tbl.monthYear.equals(yearMonth))

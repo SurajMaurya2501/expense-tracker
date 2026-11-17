@@ -23,11 +23,18 @@ class ExpenseTrackerModel {
   }
 
   factory ExpenseTrackerModel.fromJson(Map<String, dynamic> json) {
+    final category = json['category'];
+    final merchant = json['merchant_name'];
+    final amount = json['total_amount'];
     return ExpenseTrackerModel(
-      isBill: json['is_bill'],
-      category: json['category'],
-      merchantName: json['merchant_name'],
-      totalAmount: json['total_amount'],
+      isBill: json['is_bill'] == true,
+      category: category is String && category.trim().isNotEmpty
+          ? category
+          : 'Others',
+      merchantName: merchant is String && merchant.trim().isNotEmpty
+          ? merchant
+          : '-',
+      totalAmount: amount is num ? amount.toDouble() : 0,
     );
   }
 

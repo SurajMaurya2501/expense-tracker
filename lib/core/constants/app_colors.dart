@@ -18,6 +18,8 @@ class AppColors {
   static const Color contentColorWhite12 = Colors.white12;
   static const Color contentColorBlue = Color(0xFF2196F3);
   static const Color contentColorYellow = Color(0xFFFFC300);
+  static const Color coinGold = Color(0xFFFFC857);
+  static const Color coinInk = Color(0xFF1A1403);
   static const Color contentColorOrange = Color(0xFFFF683B);
   static const Color contentColorGreen = Color(0xFF3BFF49);
   static const Color contentColorPurple = Color(0xFF6E1BFF);

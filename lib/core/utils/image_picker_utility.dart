@@ -8,7 +8,7 @@ class ImagePickerUtility {
   static Future<File?> pickImageFromSource({
     ImageSource sourceType = ImageSource.gallery,
   }) async {
-    final image = await _imagePicker.pickImage(source: sourceType,);
+    final image = await _imagePicker.pickImage(source: sourceType);
     if (image == null) {
       return null;
     }
