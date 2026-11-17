@@ -1,8 +1,7 @@
 import 'package:expense_tracker/core/constants/app_theme.dart';
 import 'package:expense_tracker/core/prefs/app_prefs.dart';
 import 'package:expense_tracker/core/utils/money_format.dart';
-import 'package:expense_tracker/screens/onboarding/onboarding_screen.dart';
-import 'package:expense_tracker/screens/shell/app_shell.dart';
+import 'package:expense_tracker/screens/splash/splash_screen.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -20,11 +19,11 @@ Future<void> main() async {
   );
   final prefs = await AppPrefs.load();
   MoneyFormat.use(prefs.currency);
-  runApp(ExpenseTrackerApp(showOnboarding: !prefs.onboardingDone));
+  runApp(SpendWiseApp(showOnboarding: !prefs.onboardingDone));
 }
 
-class ExpenseTrackerApp extends StatelessWidget {
-  const ExpenseTrackerApp({super.key, required this.showOnboarding});
+class SpendWiseApp extends StatelessWidget {
+  const SpendWiseApp({super.key, required this.showOnboarding});
 
   final bool showOnboarding;
 
@@ -32,9 +31,9 @@ class ExpenseTrackerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Expense Tracker',
+      title: 'SpendWise',
       theme: AppTheme.dark,
-      home: showOnboarding ? const OnboardingScreen() : const AppShell(),
+      home: SplashScreen(showOnboarding: showOnboarding),
     );
   }
 }

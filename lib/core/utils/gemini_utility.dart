@@ -7,58 +7,64 @@ import 'package:firebase_ai/firebase_ai.dart';
 import 'package:path/path.dart' as p;
 
 class GeminiUtility {
+  /// Receipt extraction does not need reasoning. Gemini 3 defaults to thinking,
+  /// which is the main reason a bill sits on "reading" for several seconds.
+  static final GenerativeModel _model = FirebaseAI.googleAI().generativeModel(
+    model: 'gemini-3.5-flash',
+    generationConfig: GenerationConfig(
+      responseMimeType: 'application/json',
+      maxOutputTokens: 512,
+      mediaResolution: MediaResolution.medium,
+      thinkingConfig: ThinkingConfig.withThinkingLevel(
+        ThinkingLevel.minimal,
+        includeThoughts: false,
+      ),
+      responseSchema: Schema.object(
+        properties: {
+          'is_bill': Schema.boolean(
+            description: 'True only if the image is a bill or receipt.',
+          ),
+          'category': Schema.enumString(
+            enumValues: [
+              'Grocery',
+              'Accesory',
+              'Digital Product',
+              'Restaurant',
+              'Others',
+            ],
+          ),
+          'merchant_name': Schema.string(
+            description: 'Store name. Empty if unreadable.',
+          ),
+          'total_amount': Schema.number(
+            description: 'Final amount as printed. Do not convert.',
+          ),
+        },
+        optionalProperties: ['merchant_name'],
+      ),
+    ),
+  );
+
   Future<ExpenseTrackerModel> processBillWithFirebaseAi({
     required File image,
   }) async {
     try {
-      final firebaseAi = FirebaseAI.googleAI();
-      final model = firebaseAi.generativeModel(
-        model: 'gemini-3.5-flash',
-        generationConfig: GenerationConfig(
-          responseMimeType: 'application/json',
-          responseSchema: Schema.object(
-            properties: {
-              'is_bill': Schema.boolean(
-                description:
-                    'True if the image is a bill or receipt, false otherwise.',
-              ),
-              'category': Schema.enumString(
-                enumValues: [
-                  'Grocery',
-                  'Accesory',
-                  'Digital Product',
-                  'Restaurant',
-                  'Others',
-                ],
-                description: 'The category that best fits the bill.',
-              ),
-              'merchant_name': Schema.string(
-                description: 'The store or business name issuing the bill.',
-              ),
-              'total_amount': Schema.number(
-                description: 'The total numerical amount paid or due.',
-              ),
-            },
-            optionalProperties: ['merchant_name'],
-          ),
-        ),
-      );
-
       final mimeType = _getMimeType(image.path);
       final imageBytes = await image.readAsBytes();
       final prompt = [
         Content.multi([
-          InlineDataPart(mimeType, imageBytes),
+          InlineDataPart(
+            mimeType,
+            imageBytes,
+            mediaResolution: MediaResolution.medium,
+          ),
           TextPart(
-            'Verify if this is a bill, extract the merchant and total amount, and choose a strict category. '
-            'The user stores bills in ${MoneyFormat.currency.name} (${MoneyFormat.currency.symbol}). '
-            'Extract the total as printed. Do not convert it.',
+            'Extract the merchant and the printed total in ${MoneyFormat.currency.name}. Do not convert.',
           ),
         ]),
       ];
 
-      // 3. Generate response
-      final response = await model.generateContent(prompt);
+      final response = await _model.generateContent(prompt);
       final jsonString = response.text;
 
       if (jsonString == null || jsonString.isEmpty) {

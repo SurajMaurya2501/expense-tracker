@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:expense_tracker/core/constants/categories.dart';
 import 'package:expense_tracker/core/stats/expense_stats.dart';
 import 'package:expense_tracker/core/utils/month_key.dart';
@@ -24,6 +26,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final _repo = ExpenseRepository();
   late DateTime _month;
   late Stream<List<ExpenseEntity>> _expenses;
+  late final StreamSubscription<List<DateTime>> _monthsSub;
+  List<DateTime>? _months;
   String? _selectedCategory;
 
   @override
@@ -32,6 +36,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final now = DateTime.now();
     _month = DateTime(now.year, now.month);
     _expenses = _repo.watchExpenseForMonth(MonthKey.of(_month));
+    _monthsSub = _repo.watchMonthsWithExpenses().listen((months) {
+      if (!mounted) return;
+      final selectedStillThere = months.any(
+        (month) => month.year == _month.year && month.month == _month.month,
+      );
+      setState(() {
+        _months = months;
+        if (!selectedStillThere && months.isNotEmpty) {
+          _month = DateTime(months.first.year, months.first.month);
+          _selectedCategory = null;
+          _expenses = _repo.watchExpenseForMonth(MonthKey.of(_month));
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _monthsSub.cancel();
+    super.dispose();
   }
 
   void _setMonth(DateTime month) {
@@ -50,6 +74,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final months = _months;
+    if (months == null) {
+      return const SafeArea(child: Center(child: CircularProgressIndicator()));
+    }
+
     return SafeArea(
       bottom: false,
       child: StreamBuilder<List<ExpenseEntity>>(
@@ -89,12 +118,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 title: 'Dashboard',
                 subtitle: 'Where your money went',
               ),
-              const SizedBox(height: 16),
-              MonthSelector(
-                months: MonthKey.recent(),
-                selected: _month,
-                onSelected: _setMonth,
-              ),
+              if (months.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                MonthSelector(
+                  months: months,
+                  selected: _month,
+                  onSelected: _setMonth,
+                ),
+              ],
               const SizedBox(height: 16),
               SpendSummaryCard(
                 key: ValueKey(MonthKey.of(_month)),
