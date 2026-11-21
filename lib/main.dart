@@ -5,6 +5,7 @@ import 'package:expense_tracker/screens/splash/splash_screen.dart';
 import 'package:expense_tracker/services/notification_service.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -15,7 +16,11 @@ Future<void> main() async {
   await dotenv.load();
   await Firebase.initializeApp();
   await FirebaseAppCheck.instance.activate(
-    providerAndroid: const AndroidDebugProvider(),
+    // Release builds (Play Store) must use Play Integrity so Firestore and
+    // Firebase AI accept the requests. Debug builds use a debug token instead.
+    providerAndroid: kReleaseMode
+        ? const AndroidPlayIntegrityProvider()
+        : const AndroidDebugProvider(),
     providerApple: const AppleDebugProvider(),
   );
   await NotificationService.instance.init();

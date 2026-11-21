@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:expense_tracker/core/utils/money_format.dart';
 import 'package:expense_tracker/models/expense_tracker_model.dart';
+import 'package:expense_tracker/services/scan_quota_service.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:path/path.dart' as p;
 
@@ -48,6 +49,11 @@ class GeminiUtility {
   Future<ExpenseTrackerModel> processBillWithFirebaseAi({
     required File image,
   }) async {
+    // Every attempt uses one of the device's free scans, successful or not.
+    // This is outside the try block on purpose: ScanLimitReachedException and
+    // ScanQuotaUnavailableException must reach the UI, not become an empty bill.
+    await ScanQuotaService.instance.consume();
+
     try {
       final mimeType = _getMimeType(image.path);
       final imageBytes = await image.readAsBytes();

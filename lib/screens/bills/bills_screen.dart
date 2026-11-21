@@ -11,11 +11,13 @@ import 'package:expense_tracker/screens/bills/widgets/add_bill_actions.dart';
 import 'package:expense_tracker/screens/bills/widgets/analyzing_overlay.dart';
 import 'package:expense_tracker/screens/bills/widgets/bill_review_sheet.dart';
 import 'package:expense_tracker/screens/bills/widgets/manual_entry_sheet.dart';
+import 'package:expense_tracker/screens/bills/widgets/scan_quota_badge.dart';
 import 'package:expense_tracker/screens/widgets/empty_spend_view.dart';
 import 'package:expense_tracker/screens/widgets/expense_tile.dart';
 import 'package:expense_tracker/screens/widgets/screen_header.dart';
 import 'package:expense_tracker/screens/widgets/section_label.dart';
 import 'package:expense_tracker/services/bill_capture_service.dart';
+import 'package:expense_tracker/services/scan_quota_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:image_picker/image_picker.dart';
@@ -35,12 +37,17 @@ class _BillsScreenState extends State<BillsScreen> {
   late final Stream<List<ExpenseEntity>> _expenses;
   bool _busy = false;
 
+  static const _limitMessage =
+      'You have used all ${ScanQuotaService.limit} free bill scans. '
+      'You can still add bills manually.';
+
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
     _month = DateTime(now.year, now.month, now.day);
     _expenses = _repo.watchExpenseForMonth(MonthKey.of(_month));
+    ScanQuotaService.instance.refresh();
   }
 
   Future<void> _addManual() async {
@@ -52,6 +59,10 @@ class _BillsScreenState extends State<BillsScreen> {
 
   Future<void> _captureFrom(ImageSource source) async {
     if (_busy) return;
+    if (ScanQuotaService.instance.remaining.value == 0) {
+      _showMessage(_limitMessage);
+      return;
+    }
     File? image;
     try {
       image = await _capture.pick(source);
@@ -101,6 +112,16 @@ class _BillsScreenState extends State<BillsScreen> {
 
     try {
       return await _capture.analyze(image);
+    } on ScanLimitReachedException {
+      if (mounted) _showMessage(_limitMessage);
+      return null;
+    } on ScanQuotaUnavailableException {
+      if (mounted) {
+        _showMessage(
+          'Could not check your free scans. Check your connection and try again.',
+        );
+      }
+      return null;
     } catch (_) {
       if (mounted) {
         _showMessage('Could not read that bill. Try another photo.');
@@ -173,11 +194,23 @@ class _BillsScreenState extends State<BillsScreen> {
                 subtitle: MonthKey.title(_month),
               ),
               const SizedBox(height: 16),
-              AddBillActions(
-                enabled: !_busy,
-                onManual: _addManual,
-                onGallery: () => _captureFrom(ImageSource.gallery),
-                onCamera: () => _captureFrom(ImageSource.camera),
+              ValueListenableBuilder<int?>(
+                valueListenable: ScanQuotaService.instance.remaining,
+                builder: (context, remaining, _) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AddBillActions(
+                        enabled: !_busy,
+                        scansEnabled: remaining != 0,
+                        onManual: _addManual,
+                        onGallery: () => _captureFrom(ImageSource.gallery),
+                        onCamera: () => _captureFrom(ImageSource.camera),
+                      ),
+                      ScanQuotaBadge(remaining: remaining),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 22),
               const SectionLabel(

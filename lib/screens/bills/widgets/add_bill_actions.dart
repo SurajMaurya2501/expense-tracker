@@ -6,12 +6,17 @@ class AddBillActions extends StatelessWidget {
   const AddBillActions({
     super.key,
     required this.enabled,
+    this.scansEnabled = true,
     required this.onManual,
     required this.onGallery,
     required this.onCamera,
   });
 
   final bool enabled;
+
+  /// False once the device has used all its free AI scans. Manual entry stays
+  /// available.
+  final bool scansEnabled;
   final VoidCallback onManual;
   final VoidCallback onGallery;
   final VoidCallback onCamera;
@@ -29,13 +34,13 @@ class AddBillActions extends StatelessWidget {
         icon: Icons.photo_library_outlined,
         label: 'Gallery',
         semanticsLabel: 'Upload a bill from the gallery',
-        onTap: enabled ? onGallery : null,
+        onTap: enabled && scansEnabled ? onGallery : null,
       ),
       _BillAction(
         icon: Icons.photo_camera_outlined,
         label: 'Camera',
         semanticsLabel: 'Photograph a bill',
-        onTap: enabled ? onCamera : null,
+        onTap: enabled && scansEnabled ? onCamera : null,
       ),
     ];
 

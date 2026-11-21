@@ -1,0 +1,33 @@
+rules_version = '2';
+
+// Free bill-scan quota, one document per device:
+//   scan_quota/{sha256 of the Android ID}  ->  { used: int, createdAt: timestamp }
+//
+// The count can only be created at 1 and then raised by exactly 1 per scan,
+// never past 20, and can never be lowered or deleted. Reinstalling the app
+// therefore cannot reset a device's quota.
+// Keep the 20 in sync with ScanQuotaService.limit in the app.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /scan_quota/{deviceId} {
+      allow read: if deviceId.matches('^[a-f0-9]{64}$');
+
+      allow create: if deviceId.matches('^[a-f0-9]{64}$')
+                    && request.resource.data.keys().hasOnly(['used', 'createdAt'])
+                    && request.resource.data.used == 1
+                    && request.resource.data.createdAt == request.time;
+
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['used'])
+                    && resource.data.used < 20
+                    && request.resource.data.used == resource.data.used + 1;
+
+      allow delete: if false;
+    }
+
+    // Everything else is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
