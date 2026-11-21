@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:expense_tracker/core/utils/month_key.dart';
 import 'package:expense_tracker/local/database/app_database.dart';
+import 'package:expense_tracker/services/notification_service.dart';
 
 class CategorySummary {
   final String category;
@@ -13,7 +14,35 @@ class ExpenseRepository {
   final _db = AppDatabase();
 
   Future<int> insertExpense(ExpensesCompanion entity) async {
-    return await _db.into(_db.expenses).insert(entity);
+    final id = await _db.into(_db.expenses).insert(entity);
+
+    // The user has logged something today, so skip tonight's reminder.
+    final date = entity.expenseDate;
+    if (date.present && _isToday(date.value)) {
+      await NotificationService.instance.cancelTodayEvening();
+    }
+    return id;
+  }
+
+  /// Whether at least one expense is dated on the same calendar day as [day].
+  Future<bool> hasExpenseOn(DateTime day) async {
+    final start = DateTime(day.year, day.month, day.day);
+    final end = DateTime(day.year, day.month, day.day + 1);
+    final query = _db.select(_db.expenses)
+      ..where(
+        (tbl) =>
+            tbl.expenseDate.isBiggerOrEqualValue(start) &
+            tbl.expenseDate.isSmallerThanValue(end),
+      )
+      ..limit(1);
+    return (await query.get()).isNotEmpty;
+  }
+
+  bool _isToday(DateTime date) {
+    final now = DateTime.now();
+    return date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day;
   }
 
   Future<int> deleteExpense(int id) {

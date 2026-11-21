@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AppPrefs {
   static const onboardingDoneKey = 'onboarding_done';
   static const currencyCodeKey = 'currency_code';
+  static const remindersEnabledKey = 'reminders_enabled';
 
   final bool onboardingDone;
   final AppCurrency currency;
@@ -18,6 +19,17 @@ class AppPrefs {
       onboardingDone: done && code != null,
       currency: AppCurrency.byCode(code),
     );
+  }
+
+  /// Daily reminder notifications are on unless the user turned them off.
+  static Future<bool> remindersEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(remindersEnabledKey) ?? true;
+  }
+
+  static Future<void> setRemindersEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(remindersEnabledKey, enabled);
   }
 
   static Future<void> saveCurrency(AppCurrency currency) async {

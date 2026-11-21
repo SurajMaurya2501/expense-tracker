@@ -2,6 +2,7 @@ import 'package:expense_tracker/core/constants/app_theme.dart';
 import 'package:expense_tracker/core/prefs/app_prefs.dart';
 import 'package:expense_tracker/core/utils/money_format.dart';
 import 'package:expense_tracker/screens/splash/splash_screen.dart';
+import 'package:expense_tracker/services/notification_service.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ Future<void> main() async {
     providerAndroid: const AndroidDebugProvider(),
     providerApple: const AppleDebugProvider(),
   );
+  await NotificationService.instance.init();
   final prefs = await AppPrefs.load();
   MoneyFormat.use(prefs.currency);
   runApp(SpendWiseApp(showOnboarding: !prefs.onboardingDone));

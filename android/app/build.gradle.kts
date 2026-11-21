@@ -8,10 +8,13 @@ plugins {
 
 android {
     namespace = "com.example.expense_tracker"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_local_notifications requires compileSdk 37 or higher.
+    compileSdk = maxOf(flutter.compileSdkVersion, 37)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // Required by flutter_local_notifications for scheduled notifications.
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -47,5 +50,8 @@ flutter {
 dependencies {
   // Import the Firebase BoM
   implementation(platform("com.google.firebase:firebase-bom:35.1.0"))
+
+  // Core library desugaring for flutter_local_notifications.
+  coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 
 }

@@ -81,22 +81,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Lottie.asset(page.asset, height: 220, repeat: true),
+                        Lottie.asset(
+                          page.asset,
+                          height: index == 0 ? 180 : 150,
+                          repeat: true,
+                          reverse: true,
+                          fit: .cover,
+                        ),
                         const SizedBox(height: 28),
-                        Text(
-                          page.title,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.w800),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Text(
+                            page.title,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
                         ),
                         const SizedBox(height: 10),
-                        Text(
-                          page.message,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: AppColors.mainTextColor2,
-                            fontSize: 16,
-                            height: 1.4,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Text(
+                            page.message,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: AppColors.mainTextColor2,
+                              fontSize: 16,
+                              height: 1.4,
+                            ),
                           ),
                         ),
                       ],

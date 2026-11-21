@@ -1,5 +1,7 @@
+import 'package:expense_tracker/local/repositories/expense_repository.dart';
 import 'package:expense_tracker/screens/bills/bills_screen.dart';
 import 'package:expense_tracker/screens/dashboard/dashboard_screen.dart';
+import 'package:expense_tracker/services/notification_service.dart';
 import 'package:flutter/material.dart';
 
 class AppShell extends StatefulWidget {
@@ -11,6 +13,17 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _index = 0;
+  final _expenseRepo = ExpenseRepository();
+
+  @override
+  void initState() {
+    super.initState();
+    // Asks for notification permission (first run) and refreshes the
+    // 14-day reminder schedule. Skips tonight's reminder if already logged.
+    NotificationService.instance.sync(
+      hasLoggedToday: () => _expenseRepo.hasExpenseOn(DateTime.now()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
